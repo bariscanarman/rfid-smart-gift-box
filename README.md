@@ -19,7 +19,7 @@ Passive Buzzer	Audio Feedback (Status Tones)
 
 🧠 Technical Features
 
-    Secure Auth: Only the authorized Blue Keyfob UID (32 E4 A8 AB) can toggle the lock state.
+    Secure Auth: Only the authorized Blue Keyfob UID can toggle the lock state.
 
     Smooth Motion Algorithm: Instead of a harsh 0-to-90 snap, the servo moves in 1-degree increments with a 30ms delay to protect the cardboard structure.
 
