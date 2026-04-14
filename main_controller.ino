@@ -111,6 +111,7 @@ void displayMessage(String title, String sub) {
 // Default standby screen message
 void showWaitingMessage() {
   display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
   display.setTextSize(1);
   display.setCursor(20, 25);
   display.println("BEKLIYOM ASKIMI");
