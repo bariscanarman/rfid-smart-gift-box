@@ -91,7 +91,7 @@ void loop() {
   }
   
   rfid.PICC_HaltA();
-  delay(2000); // Cooldown to prevent double scans
+  delay(1000); // Cooldown to prevent double scans
 }
 
 // Function to display messages on OLED
