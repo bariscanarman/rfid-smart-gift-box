@@ -97,6 +97,7 @@ void loop() {
 // Function to display messages on OLED
 void displayMessage(String title, String sub) {
   display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
   display.setTextSize(2);
   display.setCursor(15, 15);
   display.println(title);
@@ -104,6 +105,7 @@ void displayMessage(String title, String sub) {
   display.setCursor(10, 45);
   display.println(sub);
   display.display();
+}
 }
 
 // Default standby screen message
