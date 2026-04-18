@@ -4,7 +4,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
-// PIN Configuration
+// PIN Definitions
 #define SS_PIN    5
 #define RST_PIN   4  
 #define SERVO_PIN 12
@@ -16,14 +16,14 @@ MFRC522 rfid(SS_PIN, RST_PIN);
 Servo storageLock;
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-// Master Key UID 
+// Master Key UID blue keyfob
 byte masterCard[] = {0x32, 0xE4, 0xA8, 0xAB};
 bool isUnlocked = false;
 
-// Function: Update OLED with custom messages
+// Function to update screen messages
 void displayMessage(String title, String sub) {
   display.clearDisplay();
-  display.setTextColor(SSD1306_WHITE); 
+  display.setTextColor(SSD1306_WHITE);
   display.setTextSize(2); 
   display.setCursor(10, 10);
   display.println(title);
@@ -33,7 +33,7 @@ void displayMessage(String title, String sub) {
   display.display();
 }
 
-// Function: Default standby screen
+// Function for standby mode
 void showWaitingMessage() {
   display.clearDisplay();
   display.setTextColor(SSD1306_WHITE);
@@ -43,42 +43,26 @@ void showWaitingMessage() {
   display.display();
 }
 
-// Function: Confirmation sound
 void playSuccessSound() {
   digitalWrite(BUZZER_PIN, HIGH);
-  delay(150); 
-  digitalWrite(BUZZER_PIN, LOW); 
-  delay(100);
+  delay(150); digitalWrite(BUZZER_PIN, LOW); delay(100);
   digitalWrite(BUZZER_PIN, HIGH);
-  delay(150); 
-  digitalWrite(BUZZER_PIN, LOW);
-}
-
-// Function: Error sound
-void playErrorSound() {
-  for(int i=0; i<3; i++) {
-    digitalWrite(BUZZER_PIN, HIGH);
-    delay(80); 
-    digitalWrite(BUZZER_PIN, LOW); 
-    delay(80);
-  }
+  delay(150); digitalWrite(BUZZER_PIN, LOW);
 }
 
 void setup() {
   Serial.begin(115200);
-  SPI.begin();           
-  rfid.PCD_Init();       
-  
+  SPI.begin();
+  rfid.PCD_Init();
   storageLock.attach(SERVO_PIN);
-  storageLock.write(0);  
-  
+  storageLock.write(0); // Initial locked position
   pinMode(BUZZER_PIN, OUTPUT);
   
-  // OLED Initialization
   if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println("Display connection failed!");
+    Serial.println("OLED failed!");
   } else {
-    Serial.println("Display connected successfully!");
+    // CRITICAL: Flip the display 180 degrees
+    display.setRotation(2); 
     display.clearDisplay();
     display.setTextColor(SSD1306_WHITE);
     showWaitingMessage();
@@ -86,12 +70,11 @@ void setup() {
 }
 
 void loop() {
-  // Check for new RFID cards
+  // Check for RFID scans
   if (!rfid.PICC_IsNewCardPresent()) return;
   if (!rfid.PICC_ReadCardSerial()) return;
 
   bool accessGranted = true;
-  // Compare scanned UID with Master UID
   for (byte i = 0; i < 4; i++) {
     if (rfid.uid.uidByte[i] != masterCard[i]) {
       accessGranted = false;
@@ -101,30 +84,21 @@ void loop() {
 
   if (accessGranted) {
     isUnlocked = !isUnlocked; 
-
     if (isUnlocked) {
       playSuccessSound();
       displayMessage("HOSGELDIN", "SENI COK SEVIYOMMMM");
-      
-      for (int pos = 0; pos <= 90; pos++) { 
-        storageLock.write(pos); 
-        delay(30); 
-      }
+      // Servo unlock movement
+      for (int pos = 0; pos <= 90; pos++) { storageLock.write(pos); delay(20); }
     } else {
       playSuccessSound();
-      displayMessage("BABAYYYY", "ASKIMMMMM");
-      
-      for (int pos = 90; pos >= 0; pos--) { 
-        storageLock.write(pos); 
-        delay(30); 
-      }
+      displayMessage("BABAYYY", "ASKIMMM");
+      // Servo lock movement
+      for (int pos = 90; pos >= 0; pos--) { storageLock.write(pos); delay(20); }
       delay(2000); 
       showWaitingMessage();
     }
-  } else {
-    playErrorSound();
   }
   
-  rfid.PICC_HaltA(); 
-  delay(1000);       
+  rfid.PICC_HaltA();
+  delay(1000); 
 }
